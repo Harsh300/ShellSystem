@@ -1,7 +1,7 @@
 /*
  * MyShell Project for SOFE 3950U / CSCI 3020U: Operating Systems
  *
- * Copyright (C) 2017, <GROUP MEMBERS>
+ * Copyright (C) 2017, Harshan Mohanraj, Rohil Arya
  * All rights reserved.
  * 
  */
@@ -13,6 +13,7 @@
 #include <string.h>
 #include "utility.h"
 #include "myshell.h"
+
 
 
 // Put macros or constants here using #define
@@ -28,71 +29,87 @@ int main(int argc, char *argv[])
     char buffer[BUFFER_LEN] = { 0 };
     char command[BUFFER_LEN] = { 0 };
     char arg[BUFFER_LEN] = { 0 };
+    char delim[BUFFER_LEN];
+    char* token = NULL;
 
     // Parse the commands provided using argc and argv
-	 
+	FILE *in_stream = NULL;
 	
-    // Perform an infinite loop getting command input from users
-    while (fgets(buffer, BUFFER_LEN, stdin) != NULL)
-    {	
-        // Perform string tokenization to get the command and argument
-
-	char delim[] = " ";
-	char* token;
-
-	
-	for (token = strtok(buffer, delim); token; token = strtok(NULL, delim))
-	{	
-		//scanf(token,strings[i]);
-    		printf("token=%s\n", token);
+	if(argc > 1){
+		in_stream = fopen(argv[1], "r");
+		if(in_stream == NULL){
+			
+			printf("FILE COULD NOT BE OPENED %s", argv[1]);
+			return EXIT_FAILURE;
+		}
 		
+	} else {
+		in_stream = stdin;
+		printf("%s> ", getcwd(NULL, BUFFER_LEN));
 	}
-		
-        // Check the command and execute the operations for each command
-        // cd command -- change the current directory
-        if (strcmp(command, "cd") == 0)
-        {
-		//scanf("%s",arg);
-		 
+	
+	
+    /* Perform an infinite loop getting command input from users*/
+    while (fgets(buffer, BUFFER_LEN, stdin) != NULL){
+	/* Reset inputs*/
+	strcpy(arg, ""); 
+        strcpy(command, "");
+ 
+    	/* Perform string tokenization to get the command and argument*/
+        strcpy(delim, " ");
+        token = strtok(buffer, delim); // Command is isolated
 
+        if (token[strlen(token)-1] == '\n')
+            token[strlen(token)-1] = '\0'; 
+        strcpy(command, token); // Command is initialized
 
+        /* Argument portion */
+        while(token != NULL) {
+            strcpy(delim, "\n");
+            token = strtok(NULL, delim);
+
+            if (token == NULL)
+                break;
+            strcpy(arg, token); // Argument is initialized 
         }
-        // other commands here...
+        /* cd command -- change the current directory*/
+        if (strcmp(command, "cd") == 0)
+        {	
+            if (strcmp(arg, " ") == 0 || strcmp(arg, "") == 0)
+                printf("No location given \n");
+            cd(arg);
+        }
+        /* other commands here...*/
         else if (strcmp(command, "clr") == 0)
         {
-		scanf("%s",arg);
+		system("@cls||clear");
 
         }
         else if (strcmp(command, "dir") == 0)
         {
-		scanf("%s",arg);
+		dir(arg);
 
         }
         else if (strcmp(command, "environ") == 0)
         {
-		scanf("%s",arg);
+		//environ();
 
         }
         else if (strcmp(command, "echo") == 0)
-        {
-		scanf("%s",arg);
-
+        {	
+		echo(arg);
         }
         else if (strcmp(command, "help") == 0)
         {
-		scanf("%s",arg);
+		help();
 
         }
         else if (strcmp(command, "pause") == 0)
         {
-		scanf("%s",arg);
+		pause1();
 
         }
-        else if (strcmp(command, "quit") == 0)
-        {
-		scanf("%s",arg);
-
-        }
+     
         // quit command -- exit the shell
         else if (strcmp(command, "quit") == 0)
         {
